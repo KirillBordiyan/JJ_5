@@ -69,7 +69,7 @@ public class ChatServer {
                 this.clientLogin = request.getLogin();
             } catch (IOException e) {
                 System.err.println("Не удалось прочитать сообщение от [" + clientLogin + "]: " + e.getMessage());
-                String unsuccessfulResponse = createLoginResponse(false); // пример причины: системная ошибка(парсинг мб)
+                String unsuccessfulResponse = createLoginResponse(false);
                 out.println(unsuccessfulResponse);
                 doClose();
                 return;
@@ -78,36 +78,44 @@ public class ChatServer {
 
             System.out.println("Запрос от клиента: " + clientLogin);
 
-            //Проверяем занят такой логин или нет
-            if (clients.containsKey(clientLogin)) {// если есть - посылаем отказ
-                String unsuccessfulResponse = createLoginResponse(false); // пример причины: логин занят
+            if (clients.containsKey(clientLogin)) {
+                String unsuccessfulResponse = createLoginResponse(false);
                 out.println(unsuccessfulResponse);
                 doClose();
                 return;
             }
 
-            clients.put(clientLogin, this); // если все ок, пропускаем в пати
+            clients.put(clientLogin, this);
             String successfulResponse = createLoginResponse(true);
             out.println(successfulResponse);
 
             while (true) {
-                String msgFromClient = in.nextLine(); //@login: msg
+                String msgFromClient = in.nextLine();
                 final String type;
                 try {
-                    AbstractRequest abstractRequest = objectMapper.reader().readValue(msgFromClient, AbstractRequest.class);
+                    AbstractRequest abstractRequest =
+                            objectMapper.reader().readValue(
+                                    msgFromClient,
+                                    AbstractRequest.class);
                     type = abstractRequest.getType();
                 } catch (IOException e) {
-                    System.err.println("Не удалось прочитать сообщение [while 1] от [" + clientLogin + "]: " + e.getMessage());
+                    System.err.println("Не удалось прочитать сообщение [while 1] от ["
+                            + clientLogin + "]: "
+                            + e.getMessage());
                     continue;
                 }
 
                 if (SendMessageRequest.TYPE.equals(type)) {
-                    //SendMessageRequest
                     final SendMessageRequest request;
                     try {
-                        request = objectMapper.reader().readValue(msgFromClient, SendMessageRequest.class);
+                        request =
+                                objectMapper.reader().readValue(
+                                        msgFromClient,
+                                        SendMessageRequest.class);
                     } catch (IOException e) {
-                        System.err.println("Не удалось прочитать сообщение [while 2] от [" + clientLogin + "]: " + e.getMessage());
+                        System.err.println("Не удалось прочитать сообщение [while 2] от ["
+                                + clientLogin + "]: "
+                                + e.getMessage());
                         sendMessage("Не удалось прочитать сообщение: " + e.getMessage());
                         continue;
                     }
@@ -123,7 +131,10 @@ public class ChatServer {
                 } else if (BroadcastMessageRequest.TYPE.equals(type)) {
                     final BroadcastMessageRequest broadcast;
                     try {
-                        broadcast = objectMapper.reader().readValue(msgFromClient, BroadcastMessageRequest.class);
+                        broadcast =
+                                objectMapper.reader().readValue(
+                                        msgFromClient,
+                                        BroadcastMessageRequest.class);
                     } catch (IOException e) {
                         System.err.println("Ошибка отправки для всех");
                         sendMessage("Не удалось прочитать сообщение для всех: " + e.getMessage());
@@ -141,7 +152,10 @@ public class ChatServer {
                 } else if (UsersListRequest.TYPE.equals(type)) {
                     final UsersListRequest listRequest;
                     try {
-                        listRequest = objectMapper.reader().readValue(msgFromClient, UsersListRequest.class);
+                        listRequest =
+                                objectMapper.reader().readValue(
+                                        msgFromClient,
+                                        UsersListRequest.class);
                     } catch (IOException e) {
                         System.err.println("Ошибка при попытке получения списка пользователей");
                         sendMessage("Ошибка получения списка пользователей: " + e.getMessage());
@@ -149,7 +163,6 @@ public class ChatServer {
                     }
 
                     Set<ClientHandler> set = new HashSet<>(clients.values());
-
 
                     listRequest.setMessage(set.toString());
 

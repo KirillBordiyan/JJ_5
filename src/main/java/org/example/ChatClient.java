@@ -55,26 +55,35 @@ public class ChatClient {
                             switch (requestType) {
                                 case SendMessageRequest.TYPE -> {
                                     SendMessageRequest sendMessageRequest =
-                                            objectMapper.reader().readValue(msgFromServer, SendMessageRequest.class);
+                                            objectMapper.reader().readValue(
+                                                    msgFromServer,
+                                                    SendMessageRequest.class);
+
                                     String clientFrom = sendMessageRequest.getClientFrom();
 
-                                    System.out.println("Сообщение от [" + clientFrom + "]: " + sendMessageRequest.getMessage());
+                                    showMessage(clientFrom, sendMessageRequest.getMessage());
+
                                 }
                                 case BroadcastMessageRequest.TYPE -> {
                                     BroadcastMessageRequest broadcast =
-                                            objectMapper.reader().readValue(msgFromServer, BroadcastMessageRequest.class);
+                                            objectMapper.reader().readValue(
+                                                    msgFromServer,
+                                                    BroadcastMessageRequest.class);
 
                                     String clientFrom = broadcast.getClientFrom();
-                                    System.out.println("Сообщение для всех от [" + clientFrom + "]: " + broadcast.getMessage());
+
+                                    showMessage(clientFrom, broadcast.getMessage());
                                 }
                                 case UsersListRequest.TYPE -> {
                                     UsersListRequest listRequest =
-                                            objectMapper.reader().readValue(msgFromServer, UsersListRequest.class);
+                                            objectMapper.reader().readValue(
+                                                    msgFromServer,
+                                                    UsersListRequest.class);
 
                                     String list = listRequest.getMessage();
                                     String clientFrom = "сервер";
 
-                                    System.out.println("Сообщение от [" + clientFrom + "]:\n" + list);
+                                    showMessage(clientFrom, list);
 
                                 }
                             }
@@ -134,6 +143,12 @@ public class ChatClient {
             System.err.println("Ошибка во время подключения к серверу: " + e.getMessage());
         }
         System.out.println("Отключились от сервера");
+    }
+
+    private static void showMessage(String clientFrom, String message){
+        System.out.println("Сообщение от ["
+                + clientFrom + "]: "
+                + message);
     }
 
     private static String createLoginRequest(String login) {
